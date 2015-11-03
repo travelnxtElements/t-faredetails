@@ -31,6 +31,21 @@
                 border-color: var(--grey-two,#eee);
             }
 
+            .discount {
+                -webkit-order: 97;
+                -moz-order: 97;
+                -ms-order: 97;
+                -o-order: 97;
+                order: 97;
+            }
+
+            .insurance {
+                -webkit-order: 98;
+                -moz-order: 98;
+                -ms-order: 98;
+                -o-order: 98;
+                order: 98;
+            }
             .total {
                 font-size: 18px;
                 color: var(--dark-color, #111);
@@ -42,9 +57,9 @@
                 order: 99;
             }
         </style>
-        <t-section-header label="{{label}}" secondary-label="{{_getPassenger(passengerDetails)}}"></t-section-header>
+        <t-section-header label="[[label]]" secondary-label="[[_getPassenger(passengerDetails)]]"></t-section-header>
 
-        <t-notify active="{{error}}" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another."  type="error" ></t-notify>
+        <t-notify active="[[error]]" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another."  type="error" ></t-notify>
         <div class="loader-section"  id="loaderContainer">
             <div class="layout horizontal center-justified" >
                 <t-loader id="loader" active></t-loader>
@@ -53,40 +68,40 @@
         </div>
         <div class="layout vertical section">
             <template is="dom-repeat" items="[[data]]">
-                <template is="dom-if" if="{{_isTypeMatching(item.type,'BaseFare')}}">
+                <template is="dom-if" if="[[_isTypeMatching(item,'BaseFare')]]">
                     <div class="layout horizontal item">
                         <span>Base Fare</span>
                         <span class="flex"></span>
-                        <span>{{_getDisplayAmount(item.money)}}</span>
+                        <span>[[_getDisplayAmount(item.money)]]</span>
                     </div>
                 </template>
                 
-                <template is="dom-if" if="{{_isTypeMatching(item.type,'Discount')}}">
-                    <div class="layout horizontal item">
+                <template is="dom-if" if="[[_isTypeMatching(item,'Discount')]]">
+                    <div class="layout horizontal item discount">
                         <span>Discount</span>
                         <span class="flex"></span>
-                        <span>{{_getDisplayAmount(item.money)}}</span>
+                        <span>[[_getDisplayAmount(item.money)]]</span>
                     </div>
                 </template>
-                <template is="dom-if" if="{{_isTypeMatching(item.type,'Insurance')}}">
-                    <div class="layout horizontal item">
+                <template is="dom-if" if="[[_isTypeMatching(item,'Insurance')]]">
+                    <div class="layout horizontal item insurance">
                         <span>Insurance</span>
                         <span class="flex"></span>
-                         <span>{{_getDisplayAmount(item.money)}}</span>
+                         <span>[[_getDisplayAmount(item.money)]]</span>
                     </div>
                 </template>
-                <template is="dom-if" if="{{_isTypeMatching(item.type,'TotalFare')}}">
+                <template is="dom-if" if="[[_isTypeMatching(item,'TotalFare')]]">
                     <div class="layout horizontal total">
                         <span>Total Fare</span>
                         <span class="flex"></span>
-                        <span>{{_getDisplayAmount(item.money)}}</span>
+                        <span>[[_getDisplayAmount(item.money)]]</span>
                     </div>
                 </template>
             </template>
             <div class="layout horizontal item" id="taxes" hidden>
                 <span>Taxes and Fees</span>
                 <span class="flex"></span>
-                <span>{{taxesFees}}</span>
+                <span>[[taxesFees]]</span>
             </div>
         </div>
     </template>
@@ -114,7 +129,7 @@
             label: {
                 type: String,
                 reflectToAttribute: true,
-                value: 'Fare details'
+                value: 'Fare Details'
             },
 
             taxesFees: {
@@ -125,6 +140,15 @@
             passengerDetails:{
                 type:Array,
                 notify:true
+            },
+
+            totalFare:{
+                type:Object,
+                value:null
+            },
+
+            _insurance:{
+                type:Object
             }
 
         },
@@ -162,24 +186,29 @@
         },
 
         _getDisplayAmount: function(money){
-            return money.currency + " " + money.amount;
+            var newAmount = parseFloat(Math.round(money.amount * 100) / 100).toFixed(2);
+            return money.currency + " " + newAmount;
         },
 
         _getTaxes:function(){
             if (this.data != undefined && this.data.length > 0) {
                 //console.log(this.data)
-                var x = this.data.filter(function(el){
+                var computedAmount = this.data.filter(function(el){
                     return el.type == "TotalTax" ||
                            el.type == "TotalFee";
                 }).reduce(function(total,obj){
                     return total + obj.money.amount;
                 }, 0);
-                this.taxesFees = this.data[0].money.currency + " " + x;
+                this.taxesFees = this.data[0].money.currency + " " + parseFloat(Math.round(computedAmount * 100) / 100).toFixed(2);
             }
         },
 
         _isTypeMatching: function (a, b) {
-            return a == b;
+            if(a.type == 'TotalFare')
+                this.totalFare = a;
+              if(a.type == 'Insurance')
+                this._insurance = a;
+            return a.type == b;
         },
 
         _onDataChanged: function () {
