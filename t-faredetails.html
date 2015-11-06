@@ -47,14 +47,21 @@
                 order: 98;
             }
             .total {
-                font-size: 18px;
-                color: var(--dark-color, #111);
-                padding: 10px 0;
                 -webkit-order: 99;
                 -moz-order: 99;
                 -ms-order: 99;
                 -o-order: 99;
                 order: 99;
+            }
+            .total {
+                font-size: 18px;
+                color: var(--dark-color, #111);
+                padding: 10px 0;
+                -webkit-order: 100;
+                -moz-order: 100;
+                -ms-order: 100;
+                -o-order: 100;
+                order: 100;
             }
         </style>
         <t-section-header label="[[label]]" secondary-label="[[_getPassenger(passengerDetails)]]"></t-section-header>
@@ -69,7 +76,7 @@
         <div class="layout vertical section">
             <template is="dom-repeat" items="[[data]]">
                 <template is="dom-if" if="[[_isTypeMatching(item,'BaseFare')]]">
-                    <div class="layout horizontal item">
+                    <div class="layout horizontal item baseFare">
                         <span>Base Fare</span>
                         <span class="flex"></span>
                         <span>[[_getDisplayAmount(item.money)]]</span>
@@ -90,6 +97,13 @@
                          <span>[[_getDisplayAmount(item.money)]]</span>
                     </div>
                 </template>
+                <template is="dom-if" if="[[_isTypeMatching(item,'BestPriceGuarantee')]]">
+                    <div class="layout horizontal item bestPriceGuarantee">
+                        <span>Best Price Guarantee</span>
+                        <span class="flex"></span>
+                         <span>[[_getDisplayAmount(item.money)]]</span>
+                    </div>
+                </template>
                 <template is="dom-if" if="[[_isTypeMatching(item,'TotalFare')]]">
                     <div class="layout horizontal total">
                         <span>Total Fare</span>
@@ -98,7 +112,7 @@
                     </div>
                 </template>
             </template>
-            <div class="layout horizontal item" id="taxes" hidden>
+            <div class="layout horizontal taxes" id="taxes" hidden>
                 <span>Taxes and Fees</span>
                 <span class="flex"></span>
                 <span>[[taxesFees]]</span>
