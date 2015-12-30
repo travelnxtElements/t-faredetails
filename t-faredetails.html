@@ -84,11 +84,13 @@
                 </template>
                 
                 <template is="dom-if" if="[[_isTypeMatching(item,'Discount')]]">
-                    <div class="layout horizontal item discount">
-                        <span>Discount</span>
-                        <span class="flex"></span>
-                        <span>[[_getDisplayAmount(item.money)]]</span>
-                    </div>
+                    <template is="dom-if" if="[[item.money.amount]]">
+                        <div class="layout horizontal item discount">
+                            <span>Discount</span>
+                            <span class="flex"></span>
+                            <span>[[_getDisplayAmount(item.money)]]</span>
+                        </div>
+                    </template>
                 </template>
                 <template is="dom-if" if="[[_isTypeMatching(item,'Insurance')]]">
                     <div class="layout horizontal item insurance">
