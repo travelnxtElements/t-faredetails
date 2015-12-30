@@ -222,8 +222,19 @@
         _isTypeMatching: function (a, b) {
             if(a.type == 'TotalFare')
                 this.totalFare = a;
-              if(a.type == 'Insurance')
+            if(a.type == 'Insurance')
                 this._insurance = a;
+            if(a.type == 'Discount' && a.properties){
+                var isIgnoreType = false;
+                for (var i = 0; i < a.properties.length; i++) {
+                    if(a.properties[i].key.toLowerCase() == 'type' && a.properties[i].value.toLowerCase() == 'supplier'){
+                        isIgnoreType = true;
+                    }
+                };
+                if(isIgnoreType){
+                    return false;
+                }
+            }
             return a.type == b;
         },
 
