@@ -77,9 +77,9 @@
             <template is="dom-repeat" items="[[data]]">
                 <template is="dom-if" if="[[_isTypeMatching(item,'BaseFare')]]">
                     <div class="layout horizontal item baseFare">
-                        <span>Base Fare</span>
+                        <span>[[baseFareLabel]]</span>
                         <span class="flex"></span>
-                        <span>[[_getDisplayAmount(item.money)]]</span>
+                        <span>[[_getBaseFare(item.money)]]</span>
                     </div>
                 </template>
                 
@@ -110,14 +110,14 @@
                     <div class="layout horizontal total">
                         <span>Total Fare</span>
                         <span class="flex"></span>
-                        <span>[[_getDisplayAmount(item.money)]]</span>
+                        <span>[[_getTotalFare(item.money)]]</span>
                     </div>
                 </template>
             </template>
             <div class="layout horizontal taxes item" id="taxes" hidden>
                 <span>Taxes and Fees</span>
                 <span class="flex"></span>
-                <span>[[taxesFees]]</span>
+                <span>[[taxesFeesText]]</span>
             </div>
         </div>
     </template>
@@ -135,6 +135,11 @@
                 observer:'_onError'
             },
 
+            iscollapsible:{
+                type:Boolean,
+                value:false
+            },
+
             data: {
                 type: Array,
                 value: function () { return [] },
@@ -148,9 +153,9 @@
                 value: 'Fare Details'
             },
 
-            taxesFees: {
-                type: String,
-                value: ''
+            baseFareLabel:{
+                type:String,
+                value:'Base Fare'
             },
 
             passengerDetails:{
@@ -158,9 +163,44 @@
                 notify:true
             },
 
+            /**
+             * Stores the value of total fare (base fare + tax - discount). 
+             */
             totalFare:{
-                type:Object,
-                value:null
+                type:Number,
+                value:0
+            },
+
+            /**
+             * Stores the value of base fare (base fare - total savings).
+             */
+            baseFare:{
+                type:Number,
+                value:0
+            },
+
+            /**
+             * Stores the value of taxes.
+             */
+            taxesFees: {
+                type: Number,
+                value: 0
+            },
+
+            /**
+             * Stores the value of bo discount
+             */
+            discount:{
+                type:Number,
+                value:0
+            },
+
+            /**
+             * Stores the value of supplier discount
+             */
+            saving:{
+                type:Number,
+                value:0
             },
 
             _insurance:{
@@ -206,6 +246,39 @@
             return money.currency + " " + newAmount;
         },
 
+        _getBaseFare: function (money) {
+            if (!this.baseFare) {
+                this._calculateBaseFareAmount(money);
+            }
+
+            return money.currency + " " + this.baseFare.toFixed(2);
+        },
+
+        _getTotalFare: function (money) {
+
+            if (!this.baseFare) {
+                this._calculateBaseFareAmount(money);
+            }
+
+            this.totalFare = this.baseFare + this.taxesFees - this.discount;
+            return money.currency + " " + this.totalFare;
+        },
+
+        _calculateSavings: function () {
+
+            if(!this.data || !this.data.length){
+                return;
+            }
+
+            var savings = this.data.filter(function (money, index, components) {
+                return money.type === 'TotalSaving';
+            });
+
+            if(savings && savings.length){
+                this.saving = savings[0].money.amount;
+            }
+        },
+
         _getTaxes:function(){
             if (this.data != undefined && this.data.length > 0) {
                 //console.log(this.data)
@@ -215,13 +288,22 @@
                 }).reduce(function(total,obj){
                     return total + obj.money.amount;
                 }, 0);
-                this.taxesFees = this.data[0].money.currency + " " + parseFloat(Math.round(computedAmount * 100) / 100).toFixed(2);
+                this.taxesFees = parseFloat(Math.round(computedAmount * 100) / 100);
+                this.taxesFeesText = this.data[0].money.currency + " " + this.taxesFees.toFixed(2);
             }
         },
 
+        _calculateBaseFareAmount:function (money) {
+
+            if (!this.saving) {
+                this._calculateSavings();
+            }
+
+            var savingAmount = money.amount - this.saving;
+            this.baseFare = parseFloat(Math.round(savingAmount * 100) / 100);
+        },
+
         _isTypeMatching: function (a, b) {
-            if(a.type == 'TotalFare')
-                this.totalFare = a;
             if(a.type == 'Insurance')
                 this._insurance = a;
             if(a.type == 'Discount' && a.properties){
@@ -233,6 +315,8 @@
                 };
                 if(isIgnoreType){
                     return false;
+                }else{
+                    this.discount = a.money.amount;
                 }
             }
             return a.type == b;
