@@ -347,7 +347,9 @@ Polymer({
 
     _toggle: function() {
         this.$.collapse.toggle();
-        this.$.collapseIcon.icon = this.$.collapseIcon.icon === this.collapseIcon.closed ? this.collapseIcon.opened : this.collapseIcon.closed;
+        Polymer.dom(this.root).querySelector('#collapseIcon').icon = Polymer.dom(this.root).querySelector('#collapseIcon').icon === this.collapseIcon.closed
+                                                                    ? this.collapseIcon.opened
+                                                                    : this.collapseIcon.closed;
     }
 });
 </script>
