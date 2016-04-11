@@ -39,41 +39,53 @@
             <p class="primary-text">Please wait, we are rechecking availability and price of your selected itinerary.</p>
         </div>
         <div id="fareContainer" hidden class="layout horizontal primary-text">
-            <div class="layout vertical section-small" hidden$="{{!isCollapsible}}" >
-                <iron-icon id="collapseIcon" on-tap="_toggle" icon="{{collapseIcon.closed}}"></iron-icon>
-            </div>
-            <div class="layout vertical flex item-container">
-                <div hidden$="{{!isCollapsible}}" class="layout horizontal item border-bottom baseFare">
-                    <span class="secondary-text">Hotel Fare</span>
-                    <span class="flex"></span>
-                    <span>[[currency]] [[totalFare]]</span>
+            <template is="dom-if" if="[[isCollapsible]]">
+                <div class="layout vertical section-small">
+                    <iron-icon id="collapseIcon" on-tap="_toggle" icon="{{collapseIcon.closed}}"></iron-icon>
                 </div>
+            </template>
+            <div class="layout vertical flex item-container">
+                <template is="dom-if" if="[[isCollapsible]]">
+                    <div class="layout horizontal item border-bottom baseFare">
+                        <span class="secondary-text">Hotel Fare</span>
+                        <span class="flex"></span>
+                        <span>[[currency]] [[totalFare]]</span>
+                    </div>
+                </template>
                 <iron-collapse id="collapse" opened=[[!isCollapsible]]>
                     <div class="layout horizontal item border-bottom baseFare">
                         <span class="secondary-text">[[baseFareLabel]]</span>
                         <span class="flex"></span>
                         <span>[[currency]] [[baseFare]]</span>
                     </div>
-                    <div hidden$="{{!discount}}" class="layout horizontal item border-bottom discount">
-                        <span class="secondary-text">Discount</span>
-                        <span class="flex"></span>
-                        <span>[[currency]] [[discount]]</span>
-                    </div>
-                    <div hidden$="{{!insurance}}" class="layout horizontal item border-bottom insurance">
-                        <span class="secondary-text">Insurance</span>
-                        <span class="flex"></span>
-                        <span>[[currency]] [[insurance]]</span>
-                    </div>
-                    <div hidden$="{{!bestPrice}}" class="layout horizontal item border-bottom insurance">
-                        <span class="secondary-text">Best Price Guarantee</span>
-                        <span class="flex"></span>
-                        <span>[[currency]] [[bestPrice]]</span>
-                    </div>
-                    <div hidden$="{{!taxesFees}}" class="layout horizontal taxes item border-bottom">
-                        <span class="secondary-text">Taxes and Fees</span>
-                        <span class="flex"></span>
-                        <span>[[currency]] [[taxesFees]]</span>
-                    </div>
+                    <template is="dom-if" if="[[discount]]">
+                        <div class="layout horizontal item border-bottom discount">
+                            <span class="secondary-text">Discount</span>
+                            <span class="flex"></span>
+                            <span>[[currency]] [[discount]]</span>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="[[insurance]]">
+                        <div class="layout horizontal item border-bottom insurance">
+                            <span class="secondary-text">Insurance</span>
+                            <span class="flex"></span>
+                            <span>[[currency]] [[insurance]]</span>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="[[bestPrice]]">
+                        <div class="layout horizontal item border-bottom insurance">
+                            <span class="secondary-text">Best Price Guarantee</span>
+                            <span class="flex"></span>
+                            <span>[[currency]] [[bestPrice]]</span>
+                        </div>
+                    </template>
+                    <template is="dom-if" if="[[taxesFees]]">
+                        <div class="layout horizontal taxes item border-bottom">
+                            <span class="secondary-text">Taxes and Fees</span>
+                            <span class="flex"></span>
+                            <span>[[currency]] [[taxesFees]]</span>
+                        </div>
+                    </template>
                 </iron-collapse>
             </div>
         </div>
