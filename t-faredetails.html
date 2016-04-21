@@ -47,7 +47,7 @@
             <div class="layout vertical flex item-container">
                 <template is="dom-if" if="[[isCollapsible]]">
                     <div class="layout horizontal item border-bottom baseFare">
-                        <span class="secondary-text">Hotel Fare</span>
+                        <span class="secondary-text">[[itineraryFareLabel]]</span>
                         <span class="flex"></span>
                         <span>[[currency]] [[totalFare]]</span>
                     </div>
@@ -126,7 +126,7 @@ Polymer({
                 return {
                     opened: 'icons:remove-circle-outline',
                     closed: 'icons:add-circle-outline'
-                }
+                };
             }
         },
 
@@ -136,23 +136,40 @@ Polymer({
         data: {
             type: Array,
             value: function() {
-                return []
+                return [];
             },
             notify: true,
             observer: '_onDataChanged'
         },
 
+        /**
+         * Label for component section header
+         */
         label: {
             type: String,
             reflectToAttribute: true,
             value: 'Fare Details'
         },
 
+        /**
+         * label for base fare section
+         */
         baseFareLabel: {
             type: String,
             value: 'Base Fare'
         },
+            
+        /**
+         * label for itinerary total fare
+         */            
+        itineraryFareLabel: {
+            type:String,
+            value: 'Itinerary Fare'
+        },
 
+        /**
+         * passebger count information
+        */
         passengerDetails: {
             type: Array,
             notify: true
@@ -257,29 +274,29 @@ Polymer({
         this._getTotalFare();
     },
 
-    _getBaseFare: function(money) {        
-        baseFare = this._getComponentByName('BaseFare');
+    _getBaseFare: function() {        
+        var baseFare = this._getComponentByName('BaseFare');
         if (baseFare) {
             this.baseFare = parseFloat(Math.round(baseFare.money.amount * 100) / 100);
         }
     },
 
     _getTotalFare: function() {
-        totalFare = this._getComponentByName('TotalFare');
+        var totalFare = this._getComponentByName('TotalFare');
         if (totalFare) {
             this.totalFare = parseFloat(Math.round((totalFare.money.amount - this.discount) * 100) / 100);
         }
     },
 
     _getDiscount: function() {
-        discount = this._getComponentByName('TotalDiscount');
+        var discount = this._getComponentByName('TotalDiscount');
         if (discount) {
             this.discount = parseFloat(Math.round(discount.money.amount * 100) / 100);
         }
     },
 
     _getSavings: function() {
-        saving = this._getComponentByName('TotalSaving');
+        var saving = this._getComponentByName('TotalSaving');
         if (saving) {
             this.saving = parseFloat(Math.round(saving.money.amount * 100) / 100);
         }
@@ -301,14 +318,14 @@ Polymer({
     },
 
     _getInsurance: function() {
-        insurance = this._getComponentByName('Insurance');
+        var insurance = this._getComponentByName('Insurance');
         if (insurance) {
             this.insurance = parseFloat(Math.round(insurance.money.amount * 100) / 100);
         }
     },
 
     _getBestPrice: function() {
-        bestPrice = this._getComponentByName('Insurance');
+        var bestPrice = this._getComponentByName('Insurance');
         if (bestPrice) {
             this.bestPrice = parseFloat(Math.round(bestPrice.money.amount * 100) / 100);
         }
