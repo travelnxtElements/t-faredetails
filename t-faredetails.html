@@ -1,7 +1,7 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-flex-layout/iron-flex-layout-classes.html" />
 <link rel="import" href="../iron-collapse/iron-collapse.html" />
-<link rel="import" href="../iron-icons/maps-icons.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 <link rel="import" href="../t-section-header/t-section-header.html">
 <link rel="import" href="../t-text-container/travel-element-styles.html">
 <link rel="import" href="../t-loader/t-loader.html">
@@ -25,7 +25,12 @@
         .item-container{
             padding: 0 10px;
         }
-        
+        .border-bottom:last-of-type{
+            border: 0;
+        }
+        .border-bottom:first-of-type{
+            border-bottom: 1px solid var(--grey-two,#eeeeee);
+        }
         .total {
             font-size: var(--font-18, 18px);
         }
@@ -33,39 +38,40 @@
         <t-section-header label="[[label]]" secondary-label="[[_getPassenger(passengerDetails)]]"></t-section-header>
         <t-notify active="[[error]]" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another." type="error"></t-notify>
         <div class="loader-section section-small" id="loaderContainer">
+            <p class="primary-text text-center margin-bottom-medium">Please wait, we are rechecking availability and price of your selected itinerary.</p>
             <div class="layout horizontal center-justified">
                 <t-loader id="loader" active></t-loader>
             </div>
-            <p class="primary-text">Please wait, we are rechecking availability and price of your selected itinerary.</p>
         </div>
-        <div id="fareContainer" hidden class="layout horizontal secondary-text">
+        <div id="fareContainer" hidden class="layout horizontal border-bottom">
             <template is="dom-if" if="[[isCollapsible]]">
-                <div class="layout vertical section-small">
+                <div class="layout vertical section-small secondary-text">
                     <iron-icon id="collapseIcon" on-tap="_toggle" icon="{{collapseIcon.closed}}"></iron-icon>
                 </div>
             </template>
             <div class="layout vertical flex item-container">
                 <template is="dom-if" if="[[isCollapsible]]">
-                    <div class="layout horizontal item border-bottom baseFare">
+                    <div class="layout horizontal item baseFare">
                         <span class="secondary-text">[[itineraryFareLabel]]</span>
                         <span class="flex"></span>
                         <span>[[currency]] [[totalFare]]</span>
                     </div>
                 </template>
                 <iron-collapse id="collapse" opened=[[!isCollapsible]]>
+                    <div class="border-bottom"></div>
                     <div class="layout horizontal item border-bottom baseFare">
                         <span class="secondary-text">[[baseFareLabel]]</span>
                         <span class="flex"></span>
                         <span>[[currency]] [[baseFare]]</span>
                     </div>
-                    <template is="dom-if" if="[[discount]]">
+                    <template is="dom-if" if="[[_isVisible(discount)]]">
                         <div class="layout horizontal item border-bottom discount">
                             <span class="secondary-text">Discount</span>
                             <span class="flex"></span>
                             <span>[[currency]] [[discount]]</span>
                         </div>
                     </template>
-                    <template is="dom-if" if="[[taxesFees]]">
+                    <template is="dom-if" if="[[_isVisible(taxesFees)]]">
                         <div class="layout horizontal taxes item border-bottom">
                             <span class="secondary-text">Taxes and Fees</span>
                             <span class="flex"></span>
@@ -75,14 +81,14 @@
                 </iron-collapse>          
             </div>
         </div>
-        <template is="dom-if" if="[[insurance]]">
+        <template is="dom-if" if="[[_isVisible(insurance)]]">
             <div class="layout horizontal center section-small style-scope t-faredetails border-bottom">
                 <span class="secondary-text">Insurance</span>
                 <span class="flex"></span>
                 <span>[[currency]] [[insurance]]</span>
             </div>
         </template>
-        <template is="dom-if" if="[[bestPrice]]">
+        <template is="dom-if" if="[[_isVisible(bestPrice)]]">
             <div class="layout horizontal center section-small style-scope t-faredetails border-bottom">
                 <span class="secondary-text">Best Price Guarantee</span>
                 <span class="flex"></span>
@@ -179,58 +185,57 @@ Polymer({
          * Stores the value of total fare (base fare + tax - discount). 
          */
         totalFare: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of base fare (base fare - total savings).
          */
         baseFare: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of taxes.
          */
         taxesFees: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of bo discount
          */
         discount: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of supplier discount
          */
         saving: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of insurance
          */
         insurance: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         },
 
         /**
          * Stores the value of bestprice guarantee
          */
         bestPrice: {
-            type: Number,
-            value: 0
+            type: String,
+            value: '0'
         }
-
     },
 
     _onError: function() {
@@ -277,28 +282,28 @@ Polymer({
     _getBaseFare: function() {        
         var baseFare = this._getComponentByName('BaseFare');
         if (baseFare) {
-            this.baseFare = parseFloat(Math.round(baseFare.money.amount * 100) / 100);
+            this.baseFare = this._roundOff(baseFare.money.amount);
         }
     },
 
     _getTotalFare: function() {
         var totalFare = this._getComponentByName('TotalFare');
         if (totalFare) {
-            this.totalFare = parseFloat(Math.round((totalFare.money.amount) * 100) / 100);
+            this.totalFare = this._roundOff(totalFare.money.amount);
         }
     },
 
     _getDiscount: function() {
         var discount = this._getComponentByName('TotalDiscount');
         if (discount) {
-            this.discount = parseFloat(Math.round(discount.money.amount * 100) / 100);
+            this.discount = this._roundOff(discount.money.amount);
         }
     },
 
     _getSavings: function() {
         var saving = this._getComponentByName('TotalSaving');
         if (saving) {
-            this.saving = parseFloat(Math.round(saving.money.amount * 100) / 100);
+            this.saving = this._roundOff(saving.money.amount);
         }
     },
 
@@ -314,21 +319,29 @@ Polymer({
             return total + obj.money.amount;
         }, 0);
 
-        this.taxesFees = parseFloat(Math.round(computedAmount * 100) / 100);        
+        this.taxesFees = this._roundOff(computedAmount);
     },
 
     _getInsurance: function() {
         var insurance = this._getComponentByName('Insurance');
         if (insurance) {
-            this.insurance = parseFloat(Math.round(insurance.money.amount * 100) / 100);
+            this.insurance = this._roundOff(insurance.money.amount);
         }
     },
 
     _getBestPrice: function() {
         var bestPrice = this._getComponentByName('Insurance');
         if (bestPrice) {
-            this.bestPrice = parseFloat(Math.round(bestPrice.money.amount * 100) / 100);
+            this.bestPrice = this._roundOff(bestPrice.money.amount);
         }
+    },
+
+    _roundOff:function (value) {
+        return value.toFixed(2);
+    },
+
+    _isVisible :function (value) {
+        return parseFloat(value);
     },
 
     _getComponentByName: function(name) {
@@ -364,9 +377,10 @@ Polymer({
 
     _toggle: function() {
         this.$.collapse.toggle();
-        Polymer.dom(this.root).querySelector('#collapseIcon').icon = Polymer.dom(this.root).querySelector('#collapseIcon').icon === this.collapseIcon.closed
-                                                                    ? this.collapseIcon.opened
-                                                                    : this.collapseIcon.closed;
+        var collapseIcon = Polymer.dom(this.root).querySelector('#collapseIcon');
+        collapseIcon.icon = collapseIcon.icon === this.collapseIcon.closed
+                            ? this.collapseIcon.opened
+                            : this.collapseIcon.closed;
     }
 });
 </script>

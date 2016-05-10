@@ -8,10 +8,12 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../t-faredetails.html">
+    <link rel="import" href="../../t-shared-components/theme.html">
 </head>
 
 <body>
-    <t-faredetails></t-faredetails>
+    <style is="custom-style" include="travel-element-styles"></style>
+    <t-faredetails is-collapsible></t-faredetails>
     <script>
     document.addEventListener('WebComponentsReady', function() {
         var x = document.querySelector('t-faredetails');
@@ -105,6 +107,21 @@
                 "type": "USD"
             }],
             "type": "TotalFare",
+            "properties": []
+        }, {
+            "money": {
+                "amount": 80.93,
+                "currency": "USD",
+                "displayAmount": "$80.93",
+                "type": "USD"
+            },
+            "components": [{
+                "amount": 115.2,
+                "currency": "USD",
+                "displayAmount": "$80.93",
+                "type": "USD"
+            }],
+            "type": "BaseFare",
             "properties": []
         }, {
             "money": {
