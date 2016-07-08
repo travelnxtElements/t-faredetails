@@ -51,7 +51,7 @@
             </template>
             <div class="layout vertical flex item-container">
                 <template is="dom-if" if="[[isCollapsible]]">
-                    <div class="layout horizontal item baseFare">
+                    <div class="layout horizontal item baseFare" on-tap="_toggle">
                         <span class="secondary-text">[[itineraryFareLabel]]</span>
                         <span class="flex"></span>
                         <span>[[currency]] [[totalFare]]</span>
