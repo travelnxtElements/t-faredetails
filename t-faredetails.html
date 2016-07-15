@@ -240,8 +240,6 @@ Polymer({
 
     _onError: function() {
         if (this.error) {
-            this.$.loader.active = false;
-            this.$.loader.hidden = true;
             this.$.loaderContainer.hidden = true;
         }
     },
@@ -375,14 +373,8 @@ Polymer({
 
     _resetView: function (shouldInitialize) {
         this.$.loaderContainer.hidden = !shouldInitialize;
-        this.$.loader.hidden = !shouldInitialize;
         this.$.fareContainer.hidden = shouldInitialize;
         this.$.totalFareContainer.hidden = shouldInitialize;
-
-        //loader container takes time to get visible
-        setTimeout(function () {
-            this.$.loader.active = shouldInitialize;
-        }.bind(this), 500);
     },
 
     _toggle: function() {
