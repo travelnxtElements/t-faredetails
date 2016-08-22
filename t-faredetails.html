@@ -35,7 +35,7 @@
             font-size: var(--font-18, 18px);
         }
         </style>
-        <t-section-header label="[[label]]" secondary-label="[[_getPassenger(passengerDetails)]]"></t-section-header>
+        <t-section-header label="[[label]]" secondary-label="[[secondaryLabel]]"></t-section-header>
         <t-notify active="[[error]]" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another." type="error"></t-notify>
         <div class="loader-section section-small" id="loaderContainer">
             <p class="primary-text text-center margin-bottom-medium">Please wait, we are rechecking availability and price of your selected itinerary.</p>
@@ -59,11 +59,17 @@
                 </template>
                 <iron-collapse id="collapse" opened=[[!isCollapsible]]>
                     <div class="border-bottom"></div>
-                    <div class="layout horizontal item border-bottom baseFare">
-                        <span class="secondary-text">[[baseFareLabel]]</span>
-                        <span class="flex"></span>
-                        <span>[[currency]] [[baseFare]]</span>
-                    </div>
+                    <template is="dom-if" if="[[_isVisible(baseFare)]]">
+                        <div class="layout horizontal item border-bottom baseFare">
+                            <span class="secondary-text">[[baseFareLabel]]</span>
+                            <span class="flex"></span>
+                            <span>[[currency]] [[baseFare]]</span>
+                        </div>
+                    </template>
+
+                    <!--passenger specific components will be populated here, feature is used in activities only-->
+                    <content select=".passenger-fare-components"></content>
+
                     <template is="dom-if" if="[[_isVisible(discount)]]">
                         <div class="layout horizontal item border-bottom discount">
                             <span class="secondary-text">Discount</span>
@@ -71,6 +77,7 @@
                             <span>[[currency]] [[discount]]</span>
                         </div>
                     </template>
+
                     <!-- <template is="dom-if" if="[[_isVisible(taxesFees)]]"> -->
                         <div class="layout horizontal taxes item border-bottom">
                             <span class="secondary-text">Taxes and Fees</span>
@@ -158,6 +165,14 @@ Polymer({
         },
 
         /**
+         * Secondary Label for component section header
+         */
+        secondaryLabel: {
+            type: String,
+            reflectToAttribute: true
+        },
+
+        /**
          * label for base fare section
          */
         baseFareLabel: {
@@ -178,7 +193,8 @@ Polymer({
         */
         passengerDetails: {
             type: Array,
-            notify: true
+            notify: true,
+            observer: '__buildSecondaryLabel'
         },
 
         /**
@@ -244,27 +260,35 @@ Polymer({
         }
     },
 
-    _getPassenger: function(quantity, type) {
-        var passengerInfo = "";
-        var passengerDetails = this.passengerDetails;
-        passengerDetails.forEach(function(passenger, index) {
+    __buildSecondaryLabel: function () {
+        this.secondaryLabel = "";
+
+        if (!this.passengerDetails || !this.passengerDetails.length) {
+            return this.secondaryLabel;
+        }
+
+        this.passengerDetails.forEach(function (passenger, index) {
+
             switch (passenger.type) {
                 case 'Child':
-                    if (passenger.quantity == 0 || passenger.quantity > 1)
-                        passengerInfo = passengerInfo + passenger.quantity + " Children";
+                    if (passenger.quantity === 0)
+                        break;
+                    else if (passenger.quantity > 1)
+                        this.secondaryLabel = this.secondaryLabel + passenger.quantity + " Children";
                     else
-                        passengerInfo = passengerInfo + passenger.quantity + " " + passenger.type;
+                        this.secondaryLabel = this.secondaryLabel + passenger.quantity + " " + passenger.type;
                     break;
                 default:
-                    if (passenger.quantity == 0 || passenger.quantity > 1)
-                        passengerInfo = passengerInfo + passenger.quantity + " " + passenger.type + "s";
+                    if (passenger.quantity === 0)
+                        break;
+                    else if (passenger.quantity > 1)
+                        this.secondaryLabel = this.secondaryLabel + passenger.quantity + " " + passenger.type + "s";
                     else
-                        passengerInfo = passengerInfo + passenger.quantity + " " + passenger.type;
+                        this.secondaryLabel = this.secondaryLabel + passenger.quantity + " " + passenger.type;
             }
-            if (index != passengerDetails.length - 1)
-                passengerInfo = passengerInfo + ", ";
-        });
-        return passengerInfo;
+            if (index != this.passengerDetails.length - 1 && this.passengerDetails[index + 1].quantity > 0)
+                this.secondaryLabel = this.secondaryLabel + ", ";
+        }, this);
     },
 
     _getComponents:function () {
