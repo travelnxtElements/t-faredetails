@@ -36,7 +36,9 @@
         }
         </style>
         <t-section-header label="[[label]]" secondary-label="[[secondaryLabel]]"></t-section-header>
-        <t-notify active="[[error]]" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another." type="error"></t-notify>
+        <t-notify active="[[error]]" message="Sorry we are having difficulties confirming the availability and price of your selected itinerary. Please go back and select another." type="error">
+        </t-notify>
+        <t-notify id="fareChange"></t-notify>
         <div class="loader-section section-small" id="loaderContainer">
             <p class="primary-text text-center margin-bottom-medium">Please wait, we are rechecking availability and price of your selected itinerary.</p>
             <div class="layout horizontal center-justified">
@@ -251,7 +253,37 @@ Polymer({
         bestPrice: {
             type: String,
             value: '0'
+        },
+
+        /**
+         * Stores the value of changed fare in add to cart call
+         */
+        fareChange: {
+            type: Object,
+            observer: '__onFareChange'
         }
+    },
+
+    __onFareChange: function (fareChange) {
+
+        if (this.error) {
+            return;
+        }
+
+        if (!fareChange || !fareChange.amount || Math.abs(fareChange.amount) <= 1) {
+            this.$.fareChange.active = false;
+            return;
+        }
+
+        if (fareChange.amount > 1) {
+            this.$.fareChange.type = 'warn';
+            this.$.fareChange.message = 'Oops! The fare has been increased by ' + this.currency + ' ' + Math.abs(fareChange.amount) + '!';
+        } else {
+            this.$.fareChange.type = 'success';
+            this.$.fareChange.message = 'The fare has been decreased by ' + this.currency + ' ' + Math.abs(fareChange.amount) + '!';
+        }
+
+        this.$.fareChange.active = true;
     },
 
     _onError: function() {
@@ -383,6 +415,8 @@ Polymer({
     },
 
     _onDataChanged: function() {
+
+        this.$.fareChange.active = false;
 
         if (!this.data || !this.data.length) {
             this._resetView(true);
