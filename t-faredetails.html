@@ -270,17 +270,19 @@ Polymer({
             return;
         }
 
-        if (!fareChange || !fareChange.amount || Math.abs(fareChange.amount) <= 1) {
+        var absolutefare = Math.abs(fareChange.amount);
+
+        if (!fareChange || !fareChange.amount || absolutefare <= 1) {
             this.$.fareChange.active = false;
             return;
         }
 
         if (fareChange.amount > 1) {
             this.$.fareChange.type = 'warn';
-            this.$.fareChange.message = 'Oops! The fare has been increased by ' + this.currency + ' ' + Math.abs(fareChange.amount) + '!';
+            this.$.fareChange.message = 'Oops! The fare has increased by ' + this.currency + ' ' + absolutefare;
         } else {
             this.$.fareChange.type = 'success';
-            this.$.fareChange.message = 'The fare has been decreased by ' + this.currency + ' ' + Math.abs(fareChange.amount) + '!';
+            this.$.fareChange.message = 'Yeah! The fare has decreased by ' + this.currency + ' ' + absolutefare;
         }
 
         this.$.fareChange.active = true;
